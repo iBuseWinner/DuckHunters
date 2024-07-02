@@ -78,5 +78,6 @@ public final class DuckHuntersPlugin extends JavaPlugin {
     public void updateConfigData() {
         //ToDo: update config in all files like there
         // https://github.com/iBuseWinner/Reputation/blob/master/src/main/java/ru/fennec/free/reputation/ReputationPlugin.java#L96
+        this.messageManager.updateConfigData(this.messagesConfigManager);
     }
 }
