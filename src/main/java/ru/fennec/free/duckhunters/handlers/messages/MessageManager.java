@@ -28,10 +28,23 @@ public class MessageManager {
      * @param message сообщение, в котором необходимо заменить
      * @return сообщение, в котором плейсхолдеры заменены, а цвета сконвертированы
      */
-    public String parsePluginPlaceholders(String message) {
+    private String parsePlaceholders(String message) {
         return StaticReplacer.replacer()
                 .set("prefix", messagesConfig.prefix())
                 .apply(message);
+    }
+
+    /***
+     * Заменяет все (1) общие плейхолдеры из плагина, а дальше конвертирует цвета
+     *
+     * @param message сообщение, в котором необходимо заменить
+     * @return сообщение, в котором плейсхолдеры заменены, а цвета сконвертированы
+     */
+    public Component parsePluginPlaceholders(String message) {
+        message = StaticReplacer.replacer()
+                .set("prefix", messagesConfig.prefix())
+                .apply(message);
+        return parseColors(message);
     }
 
     /***
@@ -41,8 +54,8 @@ public class MessageManager {
      * @param message исходное сообщение
      * @return отформатированное сообщение
      */
-    public String parsePlaceholders(IGamePlayer gamePlayer, String message) {
-        return PlaceholderAPI
+    public Component parsePlaceholders(IGamePlayer gamePlayer, String message) {
+        message = PlaceholderAPI
                 .setPlaceholders(gamePlayer.getBukkitPlayer(),
                         StaticReplacer.replacer()
                                 .set("player_id", gamePlayer.getId())
@@ -51,7 +64,8 @@ public class MessageManager {
                                 .set("player_loses", gamePlayer.getStatistics().getOrDefault("loses", 0L))
                                 .set("player_kills", gamePlayer.getStatistics().getOrDefault("kills", 0L))
                                 .set("player_deaths", gamePlayer.getStatistics().getOrDefault("deaths", 0L))
-                                .apply(parsePluginPlaceholders(message)));
+                                .apply(parsePlaceholders(message)));
+        return parseColors(message);
     }
 
     public void updateConfigData(ConfigManager<MessagesConfig> messagesConfigManager) {
