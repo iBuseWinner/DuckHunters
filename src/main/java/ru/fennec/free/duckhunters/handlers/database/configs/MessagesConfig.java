@@ -38,9 +38,14 @@ public interface MessagesConfig {
         String playerReset();
 
         @AnnotationBasedSorter.Order(4)
-        @ConfDefault.DefaultString("${prefix} &fИгроку &a${player_name}&f было установлено значение &a${player_statistic_selected_value}&f в поле ${player_statistic_selected_key}!")
+        @ConfDefault.DefaultString("${prefix} &fИгроку &a${player_name}&f была обновлена статистика!")
         @ConfComments("Сообщение, когда игроку изменяется статистика")
         String playerSet();
+
+        @AnnotationBasedSorter.Order(5)
+        @ConfDefault.DefaultString("${prefix} &fИгроку &a${player_name}&f была обновлена статистика!")
+        @ConfComments("Сообщение, когда игроку изменяется статистика")
+        String playerAdd();
 
         @AnnotationBasedSorter.Order(5)
         @ConfDefault.DefaultString("${prefix} &cЗначение должно быть числом!")
@@ -60,6 +65,11 @@ public interface MessagesConfig {
                 "  &a/duckhunters player <Игрок> add <Поле> <Значение> -&f добавить значение игроку"})
         @ConfComments("Ответ Администратору, когда он запрашивает список команд")
         List<String> helpStrings();
+
+        @AnnotationBasedSorter.Order(7)
+        @ConfDefault.DefaultString("${prefix} &cЗначение должно быть wins, loses, kills или deaths!")
+        @ConfComments("Сообщение, когда в команде вместо типа статистики указывается что-то другое")
+        String noStatistic();
     }
 
     interface PlayerSection {
@@ -100,11 +110,11 @@ public interface MessagesConfig {
 
         //ToDo: статистика игрока в этом и нижнем поле
         @AnnotationBasedSorter.Order(10)
-        @ConfDefault.DefaultString("${prefix} &fУ Вас сейчас &a${player_reputation}&f очков репутации, Ваше звание: &a${player_title}&f!")
+        @ConfDefault.DefaultString("${prefix} &fУ Вас сейчас &a${player_wins}&f/&a${player_loses}&f побед/поражений и &a${player_kills}&f/&a${player_deaths}&f убийств/смертей!")
         String selfInfo();
 
         @AnnotationBasedSorter.Order(11)
-        @ConfDefault.DefaultString("${prefix} &fУ игрока &a${player_name}&f сейчас &a${player_reputation}&f очков репутации, его звание: &a${player_title}&f!")
+        @ConfDefault.DefaultString("${prefix} &fУ игрока &a${player_name}&f сейчас &a${player_wins}&f/&a${player_loses}&f побед/поражений и &a${player_kills}&f/&a${player_deaths}&f убийств/смертей!")
         String playerInfo();
 
     }
