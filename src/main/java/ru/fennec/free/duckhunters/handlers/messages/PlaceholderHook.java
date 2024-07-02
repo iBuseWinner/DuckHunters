@@ -12,15 +12,15 @@ public class PlaceholderHook extends PlaceholderExpansion {
 
     private final String version;
     private final PlayersContainer playersContainer;
-    private final IDatabase database;
-    private MainConfig mainConfig;
+//    private final IDatabase database;
+//    private MainConfig mainConfig;
 
     public PlaceholderHook(String version, PlayersContainer playersContainer, IDatabase database,
                            ConfigManager<MainConfig> mainConfigManager) {
         this.version = version;
         this.playersContainer = playersContainer;
-        this.database = database;
-        this.mainConfig = mainConfigManager.getConfigData();
+//        this.database = database;
+//        this.mainConfig = mainConfigManager.getConfigData();
     }
 
     @Override
@@ -47,18 +47,20 @@ public class PlaceholderHook extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, String params) {
         IGamePlayer gamePlayer = playersContainer.getCachedPlayerByUUID(player.getUniqueId());
         if (gamePlayer != null) {
-            switch (params.toLowerCase()) {
-                case "id": //%reputation_id% - показывает игроку его id из БД
-                    return String.valueOf(gamePlayer.getId());
-                default:
-                    return params;
-            }
+            return switch (params.toLowerCase()) {
+                case "id" -> String.valueOf(gamePlayer.getId());
+                case "wins" -> String.valueOf(gamePlayer.getStatistics().getOrDefault("wins", 0L));
+                case "loses" -> String.valueOf(gamePlayer.getStatistics().getOrDefault("loses", 0L));
+                case "kills" -> String.valueOf(gamePlayer.getStatistics().getOrDefault("kills", 0L));
+                case "deaths" -> String.valueOf(gamePlayer.getStatistics().getOrDefault("deaths", 0L));
+                default -> params;
+            };
         }
         return params;
     }
 
-    public void updateConfigData(ConfigManager<MainConfig> mainConfigManager) {
-        this.mainConfig = mainConfigManager.getConfigData();
-    }
+//    public void updateConfigData(ConfigManager<MainConfig> mainConfigManager) {
+//        this.mainConfig = mainConfigManager.getConfigData();
+//    }
 
 }
