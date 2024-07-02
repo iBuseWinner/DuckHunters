@@ -1,0 +1,13 @@
+name: DuckHunters
+version: '${version}'
+main: ru.fennec.free.duckhunters.DuckHuntersPlugin
+api-version: 1.19
+softdepend: [ PlaceholderAPI ]
+authors: [ BuseSo ]
+description: Мини-игра охота за утками
+website: https://spigotmc.ru/members/307/
+
+commands:
+  duckhunters:
+    description: Главная команда плагина
+    aliases: [duckhunter, duckhunting, duckshunter, duckshunters, duckshunting, fenduckhunters, buseduckhunters]
