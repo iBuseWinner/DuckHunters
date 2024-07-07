@@ -1,9 +1,8 @@
-package ru.fennec.free.duckhunters.handlers.listeners.commands;
+package ru.fennec.free.duckhunters.handlers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import ru.fennec.free.duckhunters.DuckHuntersPlugin;
 import ru.fennec.free.duckhunters.common.abstracts.AbstractCommand;
 import ru.fennec.free.duckhunters.common.configs.ConfigManager;
@@ -178,7 +177,7 @@ public class DuckHuntersCommand extends AbstractCommand {
             return;
         }
 
-        commandSender.sendMessage(messageManager.parsePlaceholders(targetGamePlayer, messagesConfig.playerSection().selfInfo()));
+        commandSender.sendMessage(messageManager.parsePlaceholders(targetGamePlayer, messagesConfig.playerSection().playerInfo()));
     }
 
     private void forceStartGame(CommandSender commandSender) {
