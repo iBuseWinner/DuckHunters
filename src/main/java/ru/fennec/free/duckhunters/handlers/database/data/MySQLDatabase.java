@@ -2,15 +2,12 @@ package ru.fennec.free.duckhunters.handlers.database.data;
 
 import org.bukkit.entity.Player;
 import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.sqlite3.SQLitePlugin;
 import ru.fennec.free.duckhunters.common.configs.ConfigManager;
 import ru.fennec.free.duckhunters.common.interfaces.IDatabase;
 import ru.fennec.free.duckhunters.common.interfaces.IGamePlayer;
 import ru.fennec.free.duckhunters.handlers.database.configs.MainConfig;
 import ru.fennec.free.duckhunters.handlers.database.data.mappers.GamePlayerMapper;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -56,7 +53,7 @@ public class MySQLDatabase implements IDatabase {
             handle.execute("INSERT OR IGNORE INTO \"" + this.databaseSection.tableName() + "\" " +
                             "(`uuid`, `wins`, `loses`, `kills`, `deaths`) " +
                             "VALUES (?, ?, ?, ?, ?);",
-                    gamePlayer.getGamePlayerUUID().toString(),
+                    gamePlayer.getPlayerUUID().toString(),
                     0, 0, 0, 0);
         });
     }
