@@ -1,5 +1,7 @@
 package ru.fennec.free.duckhunters.handlers.players;
 
+import org.bukkit.entity.Player;
+import ru.fennec.free.duckhunters.common.interfaces.IDatabase;
 import ru.fennec.free.duckhunters.common.interfaces.IGamePlayer;
 
 import java.util.ArrayList;
@@ -8,11 +10,14 @@ import java.util.UUID;
 
 public class PlayersContainer {
 
+    private IDatabase database;
+
     //Список кэш игроков
     private final List<IGamePlayer> cachedPlayers;
 
-    public PlayersContainer() {
+    public PlayersContainer(IDatabase database) {
         this.cachedPlayers = new ArrayList<>();
+        this.database = database;
     }
 
     /***
@@ -24,10 +29,22 @@ public class PlayersContainer {
     public IGamePlayer getCachedPlayerByUUID(UUID uuid) {
         IGamePlayer gamePlayer = null;
         for (IGamePlayer target : cachedPlayers) {
-            if (uuid.equals(target.getGamePlayerUUID())) {
+            if (uuid.equals(target.getPlayerUUID())) {
                 gamePlayer = target;
             }
         }
+        return gamePlayer;
+    }
+
+    public IGamePlayer registerPlayer(Player player) {
+        IGamePlayer gamePlayer = database.wrapPlayer(player);
+        addCachedPlayer(gamePlayer);
+        return gamePlayer;
+    }
+
+    public IGamePlayer unregisterPlayer(UUID uuid) {
+        IGamePlayer gamePlayer = getCachedPlayerByUUID(uuid);
+        removeCachedPlayerByUUID(uuid);
         return gamePlayer;
     }
 
@@ -41,12 +58,12 @@ public class PlayersContainer {
     }
 
     /***
-     * Удалить игрока из кэша плагина по его UUID (Player#getUniqueId() или IGamePlayer#getGamePlayerUUID())
+     * Удалить игрока из кэша плагина по его UUID (Player#getUniqueId() или IGamePlayer#getPlayerUUID())
      *
      * @param uuid UUID, по которому идёт поиск игрока в кэше
      */
     public void removeCachedPlayerByUUID(UUID uuid) {
-        this.cachedPlayers.removeIf(gamePlayer -> uuid.equals(gamePlayer.getGamePlayerUUID()));
+        this.cachedPlayers.removeIf(gamePlayer -> uuid.equals(gamePlayer.getPlayerUUID()));
     }
 
     /***
