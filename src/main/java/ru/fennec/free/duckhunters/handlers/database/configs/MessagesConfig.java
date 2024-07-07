@@ -117,6 +117,14 @@ public interface MessagesConfig {
         @ConfDefault.DefaultString("${prefix} &fУ игрока &a${player_name}&f сейчас &a${player_wins}&f/&a${player_loses}&f побед/поражений и &a${player_kills}&f/&a${player_deaths}&f убийств/смертей!")
         String playerInfo();
 
+        @AnnotationBasedSorter.Order(12)
+        @ConfDefault.DefaultString("${prefix} &fСервер переполнен, выберите другую игру!")
+        String serverIsFull();
+
+        @AnnotationBasedSorter.Order(12)
+        @ConfDefault.DefaultString("${prefix} &fИгра на данном сервере уже идёт, выберите другой сервер!")
+        String gameRunning();
+
     }
 
 }
