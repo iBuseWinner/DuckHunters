@@ -61,7 +61,7 @@ public class SQLDatabase implements IDatabase {
             handle.execute("INSERT OR IGNORE INTO \"" + this.databaseSection.tableName() + "\" " +
                             "(`uuid`, `wins`, `loses`, `kills`, `deaths`) " +
                             "VALUES (?, ?, ?, ?, ?);",
-                    gamePlayer.getGamePlayerUUID().toString(),
+                    gamePlayer.getPlayerUUID().toString(),
                     0, 0, 0, 0);
         });
     }
