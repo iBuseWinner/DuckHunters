@@ -9,7 +9,8 @@ import ru.fennec.free.duckhunters.handlers.database.configs.MainConfig;
 import ru.fennec.free.duckhunters.handlers.database.configs.MessagesConfig;
 import ru.fennec.free.duckhunters.handlers.database.data.MySQLDatabase;
 import ru.fennec.free.duckhunters.handlers.database.data.SQLDatabase;
-import ru.fennec.free.duckhunters.handlers.listeners.commands.DuckHuntersCommand;
+import ru.fennec.free.duckhunters.handlers.DuckHuntersCommand;
+import ru.fennec.free.duckhunters.handlers.game.GameManager;
 import ru.fennec.free.duckhunters.handlers.messages.MessageManager;
 import ru.fennec.free.duckhunters.handlers.messages.PlaceholderHook;
 import ru.fennec.free.duckhunters.handlers.players.PlayersContainer;
@@ -24,6 +25,7 @@ public final class DuckHuntersPlugin extends JavaPlugin {
     private PlayersContainer playersContainer;
     private MessageManager messageManager;
     private PlaceholderHook placeholderHook;
+    private GameManager gameManager;
 
     @Override
     public void onEnable() {
@@ -31,7 +33,7 @@ public final class DuckHuntersPlugin extends JavaPlugin {
         initializeDatabase();
         initializeHandlers();
         //ToDo слушатели...
-//        registerListeners();
+        registerListeners();
         registerCommand();
     }
 
@@ -53,19 +55,25 @@ public final class DuckHuntersPlugin extends JavaPlugin {
     }
 
     private void initializeHandlers() {
-        this.playersContainer = new PlayersContainer();
+        this.playersContainer = new PlayersContainer(database);
         this.messageManager = new MessageManager(messagesConfigManager);
+        this.gameManager = new GameManager(this, ); //ToDo data folder & world loader
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             this.placeholderHook = new PlaceholderHook(getPluginMeta().getVersion(), playersContainer, database, this.mainConfigManager);
             this.placeholderHook.register();
         } else {
             getLogger().log(Level.WARNING, "Плагин PlaceholderAPI не обнаружен на данном сервере!");
-            getLogger().log(Level.WARNING, "Плагин DuckHunters не сможет обрабатывать глобальные плейсхолдеры!");
+            getLogger().log(Level.WARNING, "Плагин DuckHunters не сможет обрабатывать плейсхолдеры из других плагинов!");
         }
     }
 
     private void registerCommand() {
         new DuckHuntersCommand(this, messagesConfigManager, mainConfigManager, database, playersContainer, messageManager);
+    }
+
+    private void registerListeners() {
+        //ToDo: register PlayerEventsConventer, GlobalPlayerListener
+        // Also initialize ended, loading, playing, starting, waiting listeners but not enable them
     }
 
     @Override
@@ -79,5 +87,9 @@ public final class DuckHuntersPlugin extends JavaPlugin {
         //ToDo: update config in all files like there
         // https://github.com/iBuseWinner/Reputation/blob/master/src/main/java/ru/fennec/free/reputation/ReputationPlugin.java#L96
         this.messageManager.updateConfigData(this.messagesConfigManager);
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 }
