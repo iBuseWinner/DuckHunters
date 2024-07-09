@@ -121,9 +121,53 @@ public interface MessagesConfig {
         @ConfDefault.DefaultString("${prefix} &fСервер переполнен, выберите другую игру!")
         String serverIsFull();
 
-        @AnnotationBasedSorter.Order(12)
+        @AnnotationBasedSorter.Order(13)
         @ConfDefault.DefaultString("${prefix} &fИгра на данном сервере уже идёт, выберите другой сервер!")
         String gameRunning();
+
+        @AnnotationBasedSorter.Order(14)
+        @ConfDefault.DefaultString("${prefix} &cИгра остановлена!")
+        String stopped();
+
+        @AnnotationBasedSorter.Order(15)
+        @ConfDefault.DefaultString("&aНАЧИНАЕМ!")
+        String startTitle();
+
+        @AnnotationBasedSorter.Order(16)
+        @ConfDefault.DefaultString("&aУДАЧИ!")
+        String startSubtitle();
+
+        @AnnotationBasedSorter.Order(17)
+        @ConfDefault.DefaultLong(10)
+        long startFadeIn();
+
+        @AnnotationBasedSorter.Order(18)
+        @ConfDefault.DefaultLong(20)
+        long startStay();
+
+        @AnnotationBasedSorter.Order(19)
+        @ConfDefault.DefaultLong(10)
+        long startFadeOut();
+
+        @AnnotationBasedSorter.Order(20)
+        @ConfDefault.DefaultString("&7Ожидайте...")
+        String preparingTitle();
+
+        @AnnotationBasedSorter.Order(21)
+        @ConfDefault.DefaultString("&7Арена загружается")
+        String preparingSubtitle();
+
+        @AnnotationBasedSorter.Order(22)
+        @ConfDefault.DefaultLong(0)
+        long preparingFadeIn();
+
+        @AnnotationBasedSorter.Order(23)
+        @ConfDefault.DefaultLong(100)
+        long preparingStay();
+
+        @AnnotationBasedSorter.Order(24)
+        @ConfDefault.DefaultLong(0)
+        long preparingFadeOut();
 
     }
 
