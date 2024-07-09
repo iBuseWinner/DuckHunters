@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import ru.fennec.free.duckhunters.common.configs.ConfigManager;
 import ru.fennec.free.duckhunters.common.interfaces.IDatabase;
 import ru.fennec.free.duckhunters.common.interfaces.IGamePlayer;
+import ru.fennec.free.duckhunters.common.utils.WorldLoader;
 import ru.fennec.free.duckhunters.handlers.database.configs.MainConfig;
 import ru.fennec.free.duckhunters.handlers.database.configs.MessagesConfig;
 import ru.fennec.free.duckhunters.handlers.database.data.MySQLDatabase;
@@ -26,6 +27,7 @@ public final class DuckHuntersPlugin extends JavaPlugin {
     private MessageManager messageManager;
     private PlaceholderHook placeholderHook;
     private GameManager gameManager;
+    private WorldLoader worldLoader;
 
     @Override
     public void onEnable() {
@@ -57,7 +59,10 @@ public final class DuckHuntersPlugin extends JavaPlugin {
     private void initializeHandlers() {
         this.playersContainer = new PlayersContainer(database);
         this.messageManager = new MessageManager(messagesConfigManager);
-        this.gameManager = new GameManager(this, ); //ToDo data folder & world loader
+        this.worldLoader = new WorldLoader(this, this.mainConfigManager);
+        this.gameManager = new GameManager(this, getDataFolder(), worldLoader); //ToDo data folder & world loader
+        this.gameManager.loadGameSettings();
+        this.gameManager.prepareLimboWorld();
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             this.placeholderHook = new PlaceholderHook(getPluginMeta().getVersion(), playersContainer, database, this.mainConfigManager);
             this.placeholderHook.register();
@@ -87,9 +92,14 @@ public final class DuckHuntersPlugin extends JavaPlugin {
         //ToDo: update config in all files like there
         // https://github.com/iBuseWinner/Reputation/blob/master/src/main/java/ru/fennec/free/reputation/ReputationPlugin.java#L96
         this.messageManager.updateConfigData(this.messagesConfigManager);
+        this.worldLoader.updateConfigData(this.mainConfigManager);
     }
 
     public GameManager getGameManager() {
         return gameManager;
+    }
+
+    public WorldLoader getWorldLoader() {
+        return worldLoader;
     }
 }
