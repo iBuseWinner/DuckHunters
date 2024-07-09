@@ -6,11 +6,11 @@ import ru.fennec.free.duckhunters.DuckHuntersPlugin;
 import ru.fennec.free.duckhunters.common.events.GameStateChangeEvent;
 import ru.fennec.free.duckhunters.common.interfaces.IGame;
 import ru.fennec.free.duckhunters.common.interfaces.IGameSettings;
+import ru.fennec.free.duckhunters.common.utils.WorldLoader;
 import ru.fennec.free.duckhunters.handlers.enums.GameState;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
