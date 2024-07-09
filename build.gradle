@@ -4,9 +4,56 @@ plugins {
 
 group = 'ru.fennec.free'
 version = '0.1-БЕТА'
+ext.projectVersion = 'b1'
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
+
+def createPropertiesIfNotExist() {
+    def versionPropsFile = file('version.properties')
+    if(!versionPropsFile.exists()) {
+        versionPropsFile.createNewFile()
+        BufferedWriter writer = new BufferedWriter(new FileWriter('version.properties'))
+        writer.write("build=0")
+        writer.close()
+    }
+
+}
+
+def getBuildVersion() {
+    createPropertiesIfNotExist()
+    def versionPropsFile = file('version.properties')
+    if(versionPropsFile.canRead()) {
+        Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        return versionProps['build'].toInteger()
+    } else {
+        throw new GradleException("Could no read properties")
+    }
+}
+
+def setBuildVersion(buildVersion) {
+    createPropertiesIfNotExist()
+    def versionPropsFile = file('version.properties')
+    if(versionPropsFile.canRead()) {
+        Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        versionProps['build'] = buildVersion.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+    } else {
+        throw new GradleException("Could no read properties")
+    }
+}
+
+def incrementBuildVersion() {
+    def buildOutputFolder = file('build/libs')
+    buildOutputFolder.mkdirs()
+    Arrays.asList(buildOutputFolder.listFiles()).forEach(file -> file.delete())
+
+    def code = getBuildVersion() + 1
+    setBuildVersion(code)
+    version projectVersion + "-build" + code
+}
 
 repositories {
     mavenCentral()
@@ -21,6 +68,9 @@ repositories {
     maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
+    maven {
+        url = uri("https://maven.enginehub.org/repo/")
+    }
 }
 
 dependencies {
@@ -28,8 +78,10 @@ dependencies {
     implementation 'space.arim.dazzleconf:dazzleconf-ext-snakeyaml:1.3.0-M2'
     implementation group: 'org.jdbi', name: 'jdbi3-core', version: '3.29.0'
     implementation group: 'org.jdbi', name: 'jdbi3-sqlite', version: '3.34.0'
-    compileOnly 'me.clip:placeholderapi:2.11.2'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    compileOnly 'me.clip:placeholderapi:2.11.2'
+    compileOnly 'com.sk89q.worldedit:worldedit-core:7.2.9'
+    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:7.2.9'
 }
 
 def targetJavaVersion = 17
@@ -58,6 +110,7 @@ processResources {
 }
 
 jar {
+    incrementBuildVersion()
 //    dependsOn configurations.runtimeClasspath
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
