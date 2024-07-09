@@ -1,5 +1,5 @@
 name: DuckHunters
-version: '${version}'
+version: '${ext.projectVersion}'
 main: ru.fennec.free.duckhunters.DuckHuntersPlugin
 api-version: 1.19
 softdepend: [ PlaceholderAPI ]
