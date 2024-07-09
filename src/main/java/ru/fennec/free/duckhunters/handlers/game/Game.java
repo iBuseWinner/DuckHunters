@@ -50,6 +50,11 @@ public class Game implements IGame {
     }
 
     @Override
+    public void setTime(int seconds) {
+        this.time = seconds;
+    }
+
+    @Override
     public Location getMinArenaLocation() {
         return minArenaLocation;
     }

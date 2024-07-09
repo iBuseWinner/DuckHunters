@@ -12,6 +12,8 @@ public interface IGame {
 
     void decrementTime(int seconds);
 
+    void setTime(int seconds);
+
     Location getMinArenaLocation();
 
     Location getMaxArenaLocation();
