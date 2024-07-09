@@ -47,4 +47,30 @@ public interface MainConfig {
         }
     }
 
+    @AnnotationBasedSorter.Order(2)
+    @ConfComments("В этой папке (она внутри папки плагина DuckHunters) должны быть все миры, которые вы хотите использовать для карт")
+    @ConfDefault.DefaultString("worlds")
+    String worldsDir();
+
+    @AnnotationBasedSorter.Order(1)
+    @SubSection
+    Arena arena();
+
+    interface Arena {
+        @AnnotationBasedSorter.Order(1)
+        @ConfComments("Время обратного отсчёта")
+        @ConfDefault.DefaultInteger(10)
+        int startTime();
+
+        @AnnotationBasedSorter.Order(2)
+        @ConfComments("Время игры")
+        @ConfDefault.DefaultInteger(900)
+        int playTime();
+
+        @AnnotationBasedSorter.Order(3)
+        @ConfComments("Время игры")
+        @ConfDefault.DefaultString("schematics")
+        String schematicPath();
+    }
+
 }
