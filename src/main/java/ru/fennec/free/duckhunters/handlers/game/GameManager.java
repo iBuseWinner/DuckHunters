@@ -1,13 +1,21 @@
 package ru.fennec.free.duckhunters.handlers.game;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import ru.fennec.free.duckhunters.DuckHuntersPlugin;
+import ru.fennec.free.duckhunters.common.configs.ConfigManager;
 import ru.fennec.free.duckhunters.common.events.GameStateChangeEvent;
 import ru.fennec.free.duckhunters.common.interfaces.IGame;
+import ru.fennec.free.duckhunters.common.interfaces.IGamePlayer;
 import ru.fennec.free.duckhunters.common.interfaces.IGameSettings;
+import ru.fennec.free.duckhunters.common.replacers.StaticReplacer;
 import ru.fennec.free.duckhunters.common.utils.WorldLoader;
+import ru.fennec.free.duckhunters.handlers.database.configs.MainConfig;
+import ru.fennec.free.duckhunters.handlers.database.configs.MessagesConfig;
 import ru.fennec.free.duckhunters.handlers.enums.GameState;
+import ru.fennec.free.duckhunters.handlers.enums.PlayerRole;
+import ru.fennec.free.duckhunters.handlers.messages.MessageManager;
 
 import java.io.File;
 import java.util.HashMap;
@@ -21,13 +29,21 @@ public class GameManager {
     private GameState currentGameState;
     private File dataFolder;
     private WorldLoader worldLoader;
+    private MainConfig mainConfig;
+    private MessagesConfig messagesConfig;
+    private MessageManager messageManager;
 
     private final Map<String, IGameSettings> activeGameSettings = new HashMap<>();
 
-    public GameManager(DuckHuntersPlugin plugin, File dataFolder, WorldLoader worldLoader) {
+    public GameManager(DuckHuntersPlugin plugin, File dataFolder, WorldLoader worldLoader,
+                       ConfigManager<MainConfig> mainConfigManager, ConfigManager<MessagesConfig> messagesConfigManager,
+                       MessageManager messageManager) {
         this.plugin = plugin;
         this.dataFolder = dataFolder;
         this.worldLoader = worldLoader;
+        this.mainConfig = mainConfigManager.getConfigData();
+        this.messagesConfig = messagesConfigManager.getConfigData();
+        this.messageManager = messageManager;
         switchState(GameState.NOT_LOADED);
         //ToDo register listener loading
     }
@@ -90,9 +106,58 @@ public class GameManager {
     }
 
     public void prepareLimboWorld() {
-        //ToDo get world's name from config and load it from root
+        worldLoader.loadFromRoot(mainConfig.limboWorld());
     }
 
+    public void endGame() {
+        boolean ducksWin = false;
+        StringBuilder winners = new StringBuilder();
 
+        for (IGamePlayer gamePlayer : game.getPlayers()) {
+            if (gamePlayer.didEndedRace()) {
+                ducksWin = true;
+                winners.append(gamePlayer.getBukkitPlayer().getName()).append(", ");
+                gamePlayer.addStatistic("wins", 1);
+                mainConfig.winnersCommand().forEach(command -> {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), messageManager.parsePlaceholdersWithoutColors(gamePlayer, command));
+                });
 
+                gamePlayer.getBukkitPlayer().sendActionBar(Component.empty());
+                gamePlayer.getBukkitPlayer().setAllowFlight(true);
+                gamePlayer.getBukkitPlayer().setFlying(true);
+                gamePlayer.getBukkitPlayer().setFallDistance(0);
+            }
+        }
+
+        if (!ducksWin) {
+            for (IGamePlayer gamePlayer : game.getPlayers()) {
+                if (gamePlayer.getPlayerRole().equals(PlayerRole.HUNTER)) {
+                    winners.append(gamePlayer.getBukkitPlayer().getName()).append(", ");
+                    gamePlayer.addStatistic("wins", 1);
+                    mainConfig.winnersCommand().forEach(command -> {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), messageManager.parsePlaceholdersWithoutColors(gamePlayer, command));
+                    });
+
+                    gamePlayer.getBukkitPlayer().sendActionBar(Component.empty());
+                    gamePlayer.getBukkitPlayer().setAllowFlight(true);
+                    gamePlayer.getBukkitPlayer().setFlying(true);
+                    gamePlayer.getBukkitPlayer().setFallDistance(0);
+                }
+            }
+        }
+
+        String players = winners.toString();
+        players = players.substring(0, players.length() - 2);
+
+        for (IGamePlayer gamePlayer : game.getPlayers()) {
+            gamePlayer.getBukkitPlayer().sendMessage(messageManager.parsePlaceholders(gamePlayer, StaticReplacer.replacer()
+                    .set("players", players)
+                    .apply(messagesConfig.playerSection().winners())));
+        }
+    }
+
+    public void updateConfigData(ConfigManager<MainConfig> mainConfigManager, ConfigManager<MessagesConfig> messagesConfigManager) {
+        this.mainConfig = mainConfigManager.getConfigData();
+        this.messagesConfig = messagesConfigManager.getConfigData();
+    }
 }
