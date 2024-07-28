@@ -255,7 +255,7 @@ public class GameStateListener extends BukkitRunnable implements Listener {
         }
 
         if (gameManager.getGame().getTime() == 0) {
-            gameManager.endGame(false);
+            gameManager.endGame();
         }
     }
 
@@ -268,5 +268,10 @@ public class GameStateListener extends BukkitRunnable implements Listener {
 
     public void global() {
         //Nothing ??
+    }
+
+    public void updateConfigData(ConfigManager<MainConfig> mainConfigManager, ConfigManager<MessagesConfig> messagesConfigManager) {
+        this.mainConfig = mainConfigManager.getConfigData();
+        this.messagesConfig = messagesConfigManager.getConfigData();
     }
 }
