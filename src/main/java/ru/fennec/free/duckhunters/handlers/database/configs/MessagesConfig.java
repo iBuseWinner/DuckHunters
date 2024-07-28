@@ -169,6 +169,26 @@ public interface MessagesConfig {
         @ConfDefault.DefaultLong(0)
         long preparingFadeOut();
 
+        @AnnotationBasedSorter.Order(25)
+        @ConfDefault.DefaultString("${prefix} &fИгра окончена! Победители: ${players}")
+        String winners();
+
+        @AnnotationBasedSorter.Order(26)
+        @ConfDefault.DefaultString("${prefix} &cИгра загружается! Попробуйте подключиться немного позже...")
+        String preparingKick();
+
+        @AnnotationBasedSorter.Order(27)
+        @ConfDefault.DefaultString("${prefix} &fИгрок ${player_name} присоединился к игре! (${players-now}/${players-max})")
+        String joinBroadcast();
+
+        @AnnotationBasedSorter.Order(28)
+        @ConfDefault.DefaultString("${prefix} &fИгрок ${player_name} отключился от игры! (${players-now}/${players-max})")
+        String quitBroadcast();
+
+        @AnnotationBasedSorter.Order(29)
+        @ConfDefault.DefaultString("LOBBY | ${player_name}: ${message}")
+        String chatFormatInWaitingLobby();
+
     }
 
 }
