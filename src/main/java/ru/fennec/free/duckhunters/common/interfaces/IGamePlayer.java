@@ -21,16 +21,24 @@ public interface IGamePlayer {
 
     boolean isSpectator();
 
+    boolean didEndedRace();
+
     IGame getGame();
 
     void setId(long id);
 
     void setStatistic(String name, long value);
 
+    void addStatistic(String name, long value);
+
     void setPlayerRole(PlayerRole playerRole);
 
     void setSpectator(boolean spectator);
 
+    void setEndedRace(boolean endedRace);
+
     void setGame(IGame game);
+
+    void reset();
 
 }

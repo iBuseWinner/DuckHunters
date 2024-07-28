@@ -17,6 +17,7 @@ public class GamePlayer implements IGamePlayer {
     private Map<String, Long> statistics;
     private PlayerRole playerRole;
     private boolean spectator;
+    private boolean endedRace;
     private IGame game;
 
     public GamePlayer(Player bukkitPlayer) {
@@ -29,12 +30,16 @@ public class GamePlayer implements IGamePlayer {
         statistics.put("kills", 0L);
         statistics.put("deaths", 0L);
         this.spectator = false;
+        this.endedRace = false;
     }
 
     public GamePlayer(long id, UUID playerUUID, Map<String, Long> statistics) {
         this.id = id;
         this.playerUUID = playerUUID;
+        this.bukkitPlayer = getBukkitPlayer();
         this.statistics = statistics;
+        this.spectator = false;
+        this.endedRace = false;
     }
 
     @Override
@@ -68,6 +73,11 @@ public class GamePlayer implements IGamePlayer {
     }
 
     @Override
+    public boolean didEndedRace() {
+        return endedRace;
+    }
+
+    @Override
     public IGame getGame() {
         return game;
     }
@@ -83,6 +93,11 @@ public class GamePlayer implements IGamePlayer {
     }
 
     @Override
+    public void addStatistic(String name, long value) {
+        statistics.put(name, statistics.getOrDefault(name, 0L)+value);
+    }
+
+    @Override
     public void setPlayerRole(PlayerRole playerRole) {
         this.playerRole = playerRole;
     }
@@ -93,7 +108,22 @@ public class GamePlayer implements IGamePlayer {
     }
 
     @Override
+    public void setEndedRace(boolean endedRace) {
+        this.endedRace = endedRace;
+    }
+
+    @Override
     public void setGame(IGame game) {
         this.game = game;
+    }
+
+    public void reset() {
+        setPlayerRole(null);
+        setSpectator(false);
+        setEndedRace(false);
+
+        getBukkitPlayer().setCanPickupItems(true);
+        getBukkitPlayer().setFlying(false);
+        getBukkitPlayer().setAllowFlight(false);
     }
 }
