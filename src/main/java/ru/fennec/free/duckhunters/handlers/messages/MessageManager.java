@@ -68,6 +68,20 @@ public class MessageManager {
         return parseColors(message);
     }
 
+    public String parsePlaceholdersWithoutColors(IGamePlayer gamePlayer, String message) {
+        message = PlaceholderAPI
+                .setPlaceholders(gamePlayer.getBukkitPlayer(),
+                        StaticReplacer.replacer()
+                                .set("player_id", gamePlayer.getId())
+                                .set("player_name", gamePlayer.getBukkitPlayer().getName())
+                                .set("player_wins", gamePlayer.getStatistics().getOrDefault("wins", 0L))
+                                .set("player_loses", gamePlayer.getStatistics().getOrDefault("loses", 0L))
+                                .set("player_kills", gamePlayer.getStatistics().getOrDefault("kills", 0L))
+                                .set("player_deaths", gamePlayer.getStatistics().getOrDefault("deaths", 0L))
+                                .apply(parsePlaceholders(message)));
+        return message;
+    }
+
     public void updateConfigData(ConfigManager<MessagesConfig> messagesConfigManager) {
         this.messagesConfig = messagesConfigManager.getConfigData();
     }
