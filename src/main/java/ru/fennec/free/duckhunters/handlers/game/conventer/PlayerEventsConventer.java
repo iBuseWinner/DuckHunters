@@ -80,7 +80,8 @@ public class PlayerEventsConventer implements Listener {
 
     @EventHandler
     private void onPlayerInteractEvent(PlayerInteractEvent event) {
-        GamePlayerInteractEvent gamePlayerInteractEvent = new GamePlayerInteractEvent(playersContainer.getCachedPlayerByUUID(event.getPlayer().getUniqueId()));
+        GamePlayerInteractEvent gamePlayerInteractEvent = new GamePlayerInteractEvent(
+                playersContainer.getCachedPlayerByUUID(event.getPlayer().getUniqueId()), event.getAction());
         Bukkit.getPluginManager().callEvent(gamePlayerInteractEvent);
         event.setCancelled(gamePlayerInteractEvent.isCancelled());
     }
