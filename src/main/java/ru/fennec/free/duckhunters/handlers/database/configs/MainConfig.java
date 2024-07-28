@@ -5,6 +5,8 @@ import space.arim.dazzleconf.annote.ConfDefault;
 import space.arim.dazzleconf.annote.SubSection;
 import space.arim.dazzleconf.sorter.AnnotationBasedSorter;
 
+import java.util.List;
+
 public interface MainConfig {
 
     @AnnotationBasedSorter.Order(1)
@@ -52,7 +54,17 @@ public interface MainConfig {
     @ConfDefault.DefaultString("worlds")
     String worldsDir();
 
-    @AnnotationBasedSorter.Order(1)
+    @AnnotationBasedSorter.Order(3)
+    @ConfComments("Это мир limbo. Туда игроки перемещаются во время загрузки новой арены (случайно выбирается из всего списка арен (папка /plugins/DuckHunters/worlds")
+    @ConfDefault.DefaultString("limbo")
+    String limboWorld();
+
+    @AnnotationBasedSorter.Order(4)
+    @ConfComments("Команды, которые будут выполняться от имени консоли, по отношению к победителям игры")
+    @ConfDefault.DefaultStrings({"say ${player_name} is chipi chipi bro", "tell ${player_name} u won"})
+    List<String> winnersCommand();
+
+    @AnnotationBasedSorter.Order(100)
     @SubSection
     Arena arena();
 
