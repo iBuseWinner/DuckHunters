@@ -83,6 +83,21 @@ public interface MainConfig {
         @ConfComments("Время игры")
         @ConfDefault.DefaultString("schematics")
         String schematicPath();
+
+        @AnnotationBasedSorter.Order(4)
+        @ConfComments("Время игры")
+        @ConfDefault.DefaultString("BLOCK_NOTE_BLOCK_PLING")
+        String countdownSoundName();
+
+        @AnnotationBasedSorter.Order(5)
+        @ConfComments("Время игры")
+        @ConfDefault.DefaultDouble(1)
+        float countdownSoundVolume();
+
+        @AnnotationBasedSorter.Order(6)
+        @ConfComments("Время игры")
+        @ConfDefault.DefaultDouble(1)
+        float countdownSoundPitch();
     }
 
 }
