@@ -1,7 +1,7 @@
 package ru.fennec.free.duckhunters.handlers.enums;
 
 public enum PlayerRole {
-    DUCK, //Утка бегающая
+    DUCK, //Утка бегающая || ОСТАЁТСЯ ДАЖЕ ЕСЛИ ФИНИШИРОВАЛ
     HUNTER, //Охотник стреляющий
-    SPECTATOR //Мертвец наблюдающий
+    SPECTATOR //Мертвец наблюдающий || ТОЛЬКО ЕСЛИ ОХОТНИК ПОЙМАЛ УТОЧКУ
 }
