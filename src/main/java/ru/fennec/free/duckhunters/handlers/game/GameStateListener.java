@@ -3,25 +3,27 @@ package ru.fennec.free.duckhunters.handlers.game;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.GameMode;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import ru.fennec.free.duckhunters.DuckHuntersPlugin;
 import ru.fennec.free.duckhunters.common.configs.ConfigManager;
 import ru.fennec.free.duckhunters.common.events.GameStateChangeEvent;
 import ru.fennec.free.duckhunters.common.interfaces.IGamePlayer;
+import ru.fennec.free.duckhunters.common.replacers.StaticReplacer;
 import ru.fennec.free.duckhunters.common.utils.WorldEditHook;
 import ru.fennec.free.duckhunters.handlers.database.configs.MainConfig;
 import ru.fennec.free.duckhunters.handlers.database.configs.MessagesConfig;
 import ru.fennec.free.duckhunters.handlers.enums.GameState;
+import ru.fennec.free.duckhunters.handlers.enums.PlayerRole;
 import ru.fennec.free.duckhunters.handlers.messages.MessageManager;
 
 import java.time.Duration;
@@ -94,12 +96,27 @@ public class GameStateListener extends BukkitRunnable implements Listener {
 
     public void setPreparingState() {
         //Register loading events listener and unregister other all
+        HandlerList.unregisterAll(plugin.getPlayerPlayingListener());
+        HandlerList.unregisterAll(plugin.getPlayerWaitingListener());
+        Bukkit.getPluginManager().registerEvents(plugin.getPlayerLoadingListener(), plugin);
 
         //Teleport players to limbo
+        Location locationToTeleport = new Location(Bukkit.getWorld(mainConfig.limboWorld()), 0, 100, 0);
+        for (IGamePlayer gamePlayer : gameManager.getGame().getPlayers()) {
+            Player bukkitPlayer = gamePlayer.getBukkitPlayer();
+            bukkitPlayer.setGameMode(GameMode.SPECTATOR);
+            bukkitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 99999, 255, true, false));
+            bukkitPlayer.teleport(locationToTeleport);
+        }
 
         //Unload old world
+        plugin.getWorldLoader().unload(gameManager.getGame().getGameSettings().getLobbyLocation().getWorld());
 
         //Unload old data
+        for (IGamePlayer gamePlayer : gameManager.getGame().getPlayers()) {
+            gamePlayer.reset();
+            gamePlayer.getBukkitPlayer().getActivePotionEffects().forEach(pe -> gamePlayer.getBukkitPlayer().removePotionEffect(pe.getType()));
+        }
 
         //Start next game
         gameManager.setGame(gameManager.startNextGame());
@@ -126,6 +143,9 @@ public class GameStateListener extends BukkitRunnable implements Listener {
 
     public void setWaitingState() {
         //Register Waiting events listener and unregister other all
+        HandlerList.unregisterAll(plugin.getPlayerLoadingListener());
+        HandlerList.unregisterAll(plugin.getPlayerPlayingListener());
+        Bukkit.getPluginManager().registerEvents(plugin.getPlayerWaitingListener(), plugin);
 
         //Change world's difficulty
         try {
@@ -149,7 +169,7 @@ public class GameStateListener extends BukkitRunnable implements Listener {
             player.setGameMode(GameMode.SURVIVAL);
             player.sendTitlePart(TitlePart.TITLE, Component.empty().content("§01"));
             player.sendTitlePart(TitlePart.SUBTITLE, Component.empty().content("§01"));
-            player.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.ofMillis(0), Duration.ofMillis(2*50), Duration.ofMillis(0)));
+            player.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.ofMillis(0), Duration.ofMillis(2 * 50), Duration.ofMillis(0)));
             player.setCanPickupItems(true);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
@@ -157,7 +177,7 @@ public class GameStateListener extends BukkitRunnable implements Listener {
                 player.kick(messageManager.parsePluginPlaceholders(messagesConfig.playerSection().serverIsFull()));
             } else {
                 player.teleport(gameManager.getGame().getGameSettings().getLobbyLocation());
-                //ToDo process player join from waiting listener
+                plugin.getPlayerWaitingListener().processPlayerJoin(plugin.getPlayersContainer().getCachedPlayerByUUID(player.getUniqueId()));
                 joined++;
             }
             for (Player target : Bukkit.getOnlinePlayers()) {
@@ -168,16 +188,19 @@ public class GameStateListener extends BukkitRunnable implements Listener {
 
     public void setStartingState() {
         gameManager.getGame().setTime(mainConfig.arena().startTime());
-        //WHERE IS BROADCAST METHOD??? (message - start)
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            for (Player target : Bukkit.getOnlinePlayers()) {
-                player.showPlayer(plugin, target);
+        for (IGamePlayer gamePlayer : gameManager.getGame().getPlayers()) {
+            gamePlayer.getBukkitPlayer().sendMessage(messageManager.parsePlaceholders(gamePlayer, messagesConfig.playerSection().start()));
+            for (IGamePlayer targetGamePlayer : gameManager.getGame().getPlayers()) {
+                gamePlayer.getBukkitPlayer().showPlayer(plugin, targetGamePlayer.getBukkitPlayer());
             }
         }
     }
 
     public void setRunningState() {
         //Register Running events listener and unregister other all
+        HandlerList.unregisterAll(plugin.getPlayerLoadingListener());
+        HandlerList.unregisterAll(plugin.getPlayerWaitingListener());
+        Bukkit.getPluginManager().registerEvents(plugin.getPlayerPlayingListener(), plugin);
 
         gameManager.getGame().setTime(mainConfig.arena().playTime());
         gameManager.getGame().getGameSettings().getFirstArenaLocation().getWorld().setDifficulty(Difficulty.NORMAL);
@@ -190,9 +213,9 @@ public class GameStateListener extends BukkitRunnable implements Listener {
             gamePlayer.getBukkitPlayer().sendTitlePart(TitlePart.TITLE, messageManager.parsePlaceholders(gamePlayer, messagesConfig.playerSection().startTitle()));
             gamePlayer.getBukkitPlayer().sendTitlePart(TitlePart.TITLE, messageManager.parsePlaceholders(gamePlayer, messagesConfig.playerSection().startSubtitle()));
             gamePlayer.getBukkitPlayer().sendTitlePart(TitlePart.TIMES, Title.Times.times(
-                    Duration.ofMillis(50*messagesConfig.playerSection().startFadeIn()),
-                    Duration.ofMillis(50*messagesConfig.playerSection().startStay()),
-                    Duration.ofMillis(50*messagesConfig.playerSection().startFadeOut())));
+                    Duration.ofMillis(50 * messagesConfig.playerSection().startFadeIn()),
+                    Duration.ofMillis(50 * messagesConfig.playerSection().startStay()),
+                    Duration.ofMillis(50 * messagesConfig.playerSection().startFadeOut())));
         }
     }
 
@@ -201,9 +224,9 @@ public class GameStateListener extends BukkitRunnable implements Listener {
             player.sendTitlePart(TitlePart.TITLE, messageManager.parsePluginPlaceholders(messagesConfig.playerSection().preparingTitle()));
             player.sendTitlePart(TitlePart.TITLE, messageManager.parsePluginPlaceholders(messagesConfig.playerSection().preparingSubtitle()));
             player.sendTitlePart(TitlePart.TIMES, Title.Times.times(
-                    Duration.ofMillis(50*messagesConfig.playerSection().preparingFadeIn()),
-                    Duration.ofMillis(50*messagesConfig.playerSection().preparingStay()),
-                    Duration.ofMillis(50*messagesConfig.playerSection().preparingFadeOut())));
+                    Duration.ofMillis(50 * messagesConfig.playerSection().preparingFadeIn()),
+                    Duration.ofMillis(50 * messagesConfig.playerSection().preparingStay()),
+                    Duration.ofMillis(50 * messagesConfig.playerSection().preparingFadeOut())));
         }
 
         if (gameManager.getGame().getTime() == 0) {
@@ -221,14 +244,22 @@ public class GameStateListener extends BukkitRunnable implements Listener {
             gameManager.switchState(GameState.STARTING);
         }
 
-
+        //ToDo: give items???
     }
 
     public void startLogic() {
         //Disable countdown
         if (Bukkit.getOnlinePlayers().size() < gameManager.getGame().getGameSettings().getMinPlayers()) {
             gameManager.switchState(GameState.WAITING);
-            //broadcast for all no players to start, min players is ...
+            for (IGamePlayer gamePlayer : gameManager.getGame().getPlayers()) {
+                Player bukkitPlayer = gamePlayer.getBukkitPlayer();
+                bukkitPlayer.setLevel(0);
+                bukkitPlayer.setExp(0);
+                bukkitPlayer.sendMessage(messageManager.parsePlaceholders(gamePlayer,
+                        StaticReplacer.replacer()
+                                .set("players-min", gameManager.getGame().getGameSettings().getMinPlayers())
+                                .apply(messagesConfig.playerSection().noPlayers())));
+            }
         } else {
             if (gameManager.getGame().getTime() <= 10) {
                 if (gameManager.getGame().getTime() == 0) {
@@ -242,19 +273,30 @@ public class GameStateListener extends BukkitRunnable implements Listener {
 
     public void startCountdown() {
         for (IGamePlayer gamePlayer : gameManager.getGame().getPlayers()) {
-            //ToDo effects, sounds?
+            Player bukkitPlayer = gamePlayer.getBukkitPlayer();
+            bukkitPlayer.setLevel(gameManager.getGame().getTime());
+            bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.valueOf(mainConfig.arena().countdownSoundName()), SoundCategory.MASTER,
+                    mainConfig.arena().countdownSoundVolume(), mainConfig.arena().countdownSoundPitch());
+            bukkitPlayer.setExp(0.99f);
         }
     }
 
     public void gameLogic() {
-        //Check for game end...?
         for (Entity entity : gameManager.getGame().getMinArenaLocation().getWorld().getEntities()) {
             if (entity instanceof Arrow) {
                 if (entity.isOnGround()) entity.remove();
             }
         }
 
-        if (gameManager.getGame().getTime() == 0) {
+        boolean forceEndGame = false;
+
+        for (IGamePlayer gamePlayer : gameManager.getGame().getPlayers()) {
+            if (gamePlayer.getPlayerRole().equals(PlayerRole.DUCK)) {
+                forceEndGame = gamePlayer.didEndedRace();
+            }
+        }
+
+        if (gameManager.getGame().getTime() == 0 || forceEndGame) {
             gameManager.endGame();
         }
     }
