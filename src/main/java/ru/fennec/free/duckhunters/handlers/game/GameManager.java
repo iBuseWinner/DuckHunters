@@ -45,7 +45,6 @@ public class GameManager {
         this.messagesConfig = messagesConfigManager.getConfigData();
         this.messageManager = messageManager;
         switchState(GameState.NOT_LOADED);
-        //ToDo register listener loading
     }
 
     public void switchState(GameState to) {
@@ -114,7 +113,7 @@ public class GameManager {
         StringBuilder winners = new StringBuilder();
 
         for (IGamePlayer gamePlayer : game.getPlayers()) {
-            if (gamePlayer.didEndedRace()) {
+            if (gamePlayer.getPlayerRole().equals(PlayerRole.DUCK) && gamePlayer.didEndedRace()) {
                 ducksWin = true;
                 winners.append(gamePlayer.getBukkitPlayer().getName()).append(", ");
                 gamePlayer.addStatistic("wins", 1);
@@ -138,6 +137,16 @@ public class GameManager {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), messageManager.parsePlaceholdersWithoutColors(gamePlayer, command));
                     });
 
+                    gamePlayer.getBukkitPlayer().sendActionBar(Component.empty());
+                    gamePlayer.getBukkitPlayer().setAllowFlight(true);
+                    gamePlayer.getBukkitPlayer().setFlying(true);
+                    gamePlayer.getBukkitPlayer().setFallDistance(0);
+                }
+            }
+        } else {
+            for (IGamePlayer gamePlayer : game.getPlayers()) {
+                if (gamePlayer.getPlayerRole().equals(PlayerRole.HUNTER)) {
+                    gamePlayer.addStatistic("loses", 1);
                     gamePlayer.getBukkitPlayer().sendActionBar(Component.empty());
                     gamePlayer.getBukkitPlayer().setAllowFlight(true);
                     gamePlayer.getBukkitPlayer().setFlying(true);
