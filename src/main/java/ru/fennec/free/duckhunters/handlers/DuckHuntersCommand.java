@@ -8,10 +8,13 @@ import ru.fennec.free.duckhunters.common.abstracts.AbstractCommand;
 import ru.fennec.free.duckhunters.common.configs.ConfigManager;
 import ru.fennec.free.duckhunters.common.interfaces.IDatabase;
 import ru.fennec.free.duckhunters.common.interfaces.IGamePlayer;
+import ru.fennec.free.duckhunters.common.replacers.StaticReplacer;
 import ru.fennec.free.duckhunters.handlers.database.configs.MainConfig;
 import ru.fennec.free.duckhunters.handlers.database.configs.MessagesConfig;
 import ru.fennec.free.duckhunters.handlers.messages.MessageManager;
 import ru.fennec.free.duckhunters.handlers.players.PlayersContainer;
+
+import java.util.Map;
 
 public class DuckHuntersCommand extends AbstractCommand {
 
@@ -46,8 +49,8 @@ public class DuckHuntersCommand extends AbstractCommand {
                     case "player" -> sendHelp(commandSender);
                     case "reload" -> reloadPlugin(commandSender);
                     case "about" -> aboutPlugin(commandSender);
-                    case "start" -> startGame(commandSender);
-                    case "forcestart" -> forceStartGame(commandSender);
+//                    case "start" -> startGame(commandSender);
+//                    case "forcestart" -> forceStartGame(commandSender);
                     default -> sendOtherInfo(commandSender, args[0]);
                 }
                 break;
@@ -177,16 +180,25 @@ public class DuckHuntersCommand extends AbstractCommand {
             return;
         }
 
-        commandSender.sendMessage(messageManager.parsePlaceholders(targetGamePlayer, messagesConfig.playerSection().playerInfo()));
+        Map<String, Long> statistics = targetGamePlayer.getStatistics();
+        commandSender.sendMessage(messageManager.parsePlaceholders(targetGamePlayer,
+                StaticReplacer.replacer()
+                        .set("player_wins", statistics.getOrDefault("wins", 0L))
+                        .set("player_loses", statistics.getOrDefault("loses", 0L))
+                        .set("player_kills", statistics.getOrDefault("kills", 0L))
+                        .set("player_deaths", statistics.getOrDefault("deaths", 0L))
+                        .apply(messagesConfig.playerSection().playerInfo())));
     }
 
-    private void forceStartGame(CommandSender commandSender) {
-        //ToDo: force start game (5 seconds to game start)
-    }
-
-    private void startGame(CommandSender commandSender) {
-        //ToDo: start timer to game start (30 or 60 seconds)
-    }
+    //ToDo: not now lol
+//    private void forceStartGame(CommandSender commandSender) {
+//        //Force start game (5 seconds to game start)
+//        plugin.getGameManager().getGame().setTime(5);
+//    }
+//
+//    private void startGame(CommandSender commandSender) {
+//        //Start timer to game start (30 or 60 seconds)
+//    }
 
     private void sendSelfInfo(CommandSender commandSender) {
         if (!(commandSender instanceof Player)) {
@@ -195,7 +207,14 @@ public class DuckHuntersCommand extends AbstractCommand {
         }
 
         IGamePlayer gamePlayer = playersContainer.getCachedPlayerByUUID(((Player) commandSender).getUniqueId());
-        commandSender.sendMessage(messageManager.parsePlaceholders(gamePlayer, messagesConfig.playerSection().selfInfo()));
+        Map<String, Long> statistics = gamePlayer.getStatistics();
+        commandSender.sendMessage(messageManager.parsePlaceholders(gamePlayer,
+                StaticReplacer.replacer()
+                        .set("player_wins", statistics.getOrDefault("wins", 0L))
+                        .set("player_loses", statistics.getOrDefault("loses", 0L))
+                        .set("player_kills", statistics.getOrDefault("kills", 0L))
+                        .set("player_deaths", statistics.getOrDefault("deaths", 0L))
+                        .apply(messagesConfig.playerSection().selfInfo())));
     }
 
     /*
