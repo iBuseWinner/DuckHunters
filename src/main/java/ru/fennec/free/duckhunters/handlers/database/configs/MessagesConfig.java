@@ -108,7 +108,6 @@ public interface MessagesConfig {
         @ConfComments("Сообщение, если игрок не в кэше плагина")
         String playerNotInCache();
 
-        //ToDo: статистика игрока в этом и нижнем поле
         @AnnotationBasedSorter.Order(10)
         @ConfDefault.DefaultString("${prefix} &fУ Вас сейчас &a${player_wins}&f/&a${player_loses}&f побед/поражений и &a${player_kills}&f/&a${player_deaths}&f убийств/смертей!")
         String selfInfo();
@@ -188,6 +187,14 @@ public interface MessagesConfig {
         @AnnotationBasedSorter.Order(29)
         @ConfDefault.DefaultString("LOBBY | ${player_name}: ${message}")
         String chatFormatInWaitingLobby();
+
+        @AnnotationBasedSorter.Order(30)
+        @ConfDefault.DefaultString("${prefix} &cНедостаточно игроков для запуска игры! Минимум игроков: ${players-min}")
+        String noPlayers();
+
+        @AnnotationBasedSorter.Order(31)
+        @ConfDefault.DefaultString("${prefix} &fМинимальное количество игроков набрано, запускаем игру.")
+        String start();
 
     }
 
