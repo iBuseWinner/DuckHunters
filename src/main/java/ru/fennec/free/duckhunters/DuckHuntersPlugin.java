@@ -44,7 +44,6 @@ public final class DuckHuntersPlugin extends JavaPlugin {
         loadConfigs();
         initializeDatabase();
         initializeHandlers();
-        //ToDo слушатели...
         registerListeners();
         registerCommand();
 
@@ -91,8 +90,6 @@ public final class DuckHuntersPlugin extends JavaPlugin {
     }
 
     private void registerListeners() {
-        //ToDo: register PlayerEventsConventer, GlobalPlayerListener
-        // Also initialize ended, loading, playing, starting, waiting listeners but not enable them
         getServer().getPluginManager().registerEvents(
                 new PlayerEventsConventer(this, messageManager, mainConfigManager, messagesConfigManager, playersContainer), this);
         getServer().getPluginManager().registerEvents(gameStateListener, this);
